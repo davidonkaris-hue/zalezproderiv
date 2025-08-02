@@ -1,35 +1,45 @@
 import streamlit as st
-from utils.signal_generator import generate_signals
 import time
+import pandas as pd
+from datetime import datetime
 
 st.set_page_config(page_title="ZalezPro Signals", layout="wide")
-
-st.title("📊 ZalezPro Trading Dashboard")
-st.caption("Live signals updating every minute")
-
-REFRESH_INTERVAL = 60  # in seconds
-
 placeholder = st.empty()
 
-def display_signals():
-    signals = generate_signals()
-    if not signals:
-        st.warning("No valid signals at the moment.")
-        return
+# Sample list of Deriv markets
+markets = ["Volatility 75 Index", "Volatility 75 (1s)", "Volatility 100", "Volatility 100 (1s)", "Volatility 25", "Volatility 25 (1s)"]
 
-    for signal in signals:
-        with st.container():
-            st.subheader(f"🟢 {signal['symbol']} — {signal['signal_type']}")
-            st.write(f"**Entry**: {signal['entry']}")
-            st.write(f"**Stop Loss**: {signal['sl']}")
-            st.write(f"**Take Profits**: {signal['tp1']}, {signal['tp2']}, {signal['tp3']}")
-            st.write(f"**Confidence**: {signal['confidence']}%")
-            st.write(f"**Support**: {signal['support']}, **Resistance**: {signal['resistance']}")
-            st.write(f"**Outlook**: ST - {signal['outlook']['short_term']}, MT - {signal['outlook']['mid_term']}, LT - {signal['outlook']['long_term']}")
-            st.divider()
+def fetch_signal_data():
+    # Simulated data – replace with real signal logic
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data = {
+        "Market": markets,
+        "Signal": ["Buy", "Sell", "Hold", "Buy", "Sell", "Buy"],
+        "Confidence": [88, 72, 60, 90, 75, 82],
+        "TP1": [100, 80, 0, 120, 70, 110],
+        "TP2": [150, 120, 0, 160, 100, 140],
+        "TP3": [200, 160, 0, 210, 130, 180],
+        "Timestamp": [now]*6
+    }
+    return pd.DataFrame(data)
 
-while True:
+def render_dashboard():
     with placeholder.container():
-        display_signals()
-    time.sleep(REFRESH_INTERVAL)
-    placeholder.empty()
+        st.title("📊 ZalezPro Signal Dashboard")
+        st.markdown("Real-time signals refreshed every **60 seconds**.")
+
+        df = fetch_signal_data()
+
+        for index, row in df.iterrows():
+            st.markdown("---")
+            with st.container():
+                st.subheader(f"🧭 {row['Market']}")
+                st.write(f"**Signal:** {row['Signal']}")
+                st.write(f"**Confidence:** {row['Confidence']}%")
+                st.write(f"**TP1:** {row['TP1']} | **TP2:** {row['TP2']} | **TP3:** {row['TP3']}")
+                st.caption(f"_Last updated: {row['Timestamp']}_")
+
+# Loop that refreshes dashboard every 60 seconds
+while True:
+    render_dashboard()
+    time.sleep(60)
