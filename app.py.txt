@@ -1,0 +1,35 @@
+import streamlit as st
+from utils.signal_generator import generate_signals
+import time
+
+st.set_page_config(page_title="ZalezPro Signals", layout="wide")
+
+st.title("📊 ZalezPro Trading Dashboard")
+st.caption("Live signals updating every minute")
+
+REFRESH_INTERVAL = 60  # in seconds
+
+placeholder = st.empty()
+
+def display_signals():
+    signals = generate_signals()
+    if not signals:
+        st.warning("No valid signals at the moment.")
+        return
+
+    for signal in signals:
+        with st.container():
+            st.subheader(f"🟢 {signal['symbol']} — {signal['signal_type']}")
+            st.write(f"**Entry**: {signal['entry']}")
+            st.write(f"**Stop Loss**: {signal['sl']}")
+            st.write(f"**Take Profits**: {signal['tp1']}, {signal['tp2']}, {signal['tp3']}")
+            st.write(f"**Confidence**: {signal['confidence']}%")
+            st.write(f"**Support**: {signal['support']}, **Resistance**: {signal['resistance']}")
+            st.write(f"**Outlook**: ST - {signal['outlook']['short_term']}, MT - {signal['outlook']['mid_term']}, LT - {signal['outlook']['long_term']}")
+            st.divider()
+
+while True:
+    with placeholder.container():
+        display_signals()
+    time.sleep(REFRESH_INTERVAL)
+    placeholder.empty()

@@ -1,0 +1,53 @@
+import random
+
+def fetch_market_data(symbol):
+    return [
+        {'time': '2025-08-02T10:00:00Z', 'open': 100, 'high': 105, 'low': 98, 'close': 104},
+        {'time': '2025-08-02T11:00:00Z', 'open': 104, 'high': 108, 'low': 103, 'close': 107.5},
+        {'time': '2025-08-02T12:00:00Z', 'open': 107.5, 'high': 110.5, 'low': 106, 'close': 110.2}
+    ]
+
+def analyze_breakout(data):
+    last = data[-1]
+    prev = data[-2]
+    momentum = last['close'] - prev['close']
+    breakout = last['close'] > max(prev['high'], last['open'])
+
+    if momentum > 1.0 and breakout:
+        entry = last['close']
+        sl = entry - (momentum * 1)
+        tp1 = entry + (momentum * 1)
+        tp2 = entry + (momentum * 2)
+        tp3 = entry + (momentum * 3)
+        confidence = min(95, 60 + int(momentum * 10))
+
+        return {
+            'symbol': 'V75',
+            'entry': entry,
+            'sl': sl,
+            'tp1': tp1,
+            'tp2': tp2,
+            'tp3': tp3,
+            'confidence': confidence,
+            'signal_type': 'Momentum Breakout',
+            'outlook': {
+                'short_term': 'Bullish',
+                'mid_term': 'Bullish' if momentum > 2 else 'Neutral',
+                'long_term': 'Bullish'
+            },
+            'support': prev['low'],
+            'resistance': max(prev['high'], last['high'])
+        }
+
+    return None
+
+def generate_signals():
+    markets = ['V75', 'V75(1s)', 'V100', 'V100(1s)', 'V25', 'V25(1s)']
+    signals = []
+    for symbol in markets:
+        data = fetch_market_data(symbol)
+        signal = analyze_breakout(data)
+        if signal:
+            signal['symbol'] = symbol
+            signals.append(signal)
+    return signals
